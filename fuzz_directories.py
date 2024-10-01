@@ -13,7 +13,7 @@ def fuzz_directories(url, wordlist):
 
 if __name__ == '__main__':
     # Defina a URL alvo
-    url = ''  # Substitua pela URL alvo
+    url = ''  
     
     # Defina o caminho para o arquivo de wordlist
     wordlist = ''
