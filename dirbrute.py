@@ -17,7 +17,6 @@ import os
 import signal
 import json
 
-# Cores para output (ANSI)
 class Colors:
     GREEN = '\033[92m'
     RED = '\033[91m'
@@ -51,7 +50,6 @@ class DirBrute:
         self.json_output = json_output
         self.clear_screen = clear_screen
         
-        # Controle de interrupção
         self.interrupted = False
         self.interrupt_lock = threading.Lock()
         
@@ -114,7 +112,6 @@ class DirBrute:
             # Ordenar por status code
             status_color = Colors.GREEN if status_code < 300 else Colors.YELLOW if status_code < 400 else Colors.CYAN if status_code < 500 else Colors.RED
             
-            # Formatação profissional
             status_icon = "✓" if status_code < 300 else "→" if status_code < 400 else "✗" if status_code < 500 else "✗"
             
             message = f"{Colors.GREEN}[+]{Colors.RESET} {Colors.BOLD}{url:<60}{Colors.RESET} {status_color}[{status_code}]{Colors.RESET}"
@@ -163,7 +160,6 @@ class DirBrute:
         try:
             self.rate_limit_wait()
             
-            # Verificar novamente após rate limit
             if self.is_interrupted():
                 return
             
@@ -195,7 +191,6 @@ class DirBrute:
                 with self.lock:
                     self.successful_requests += 1
                 
-                # Verificar se deve reportar
                 should_report = True
                 
                 # Filtrar por status code
@@ -274,7 +269,6 @@ class DirBrute:
         if self.clear_screen:
             os.system('clear' if os.name != 'nt' else 'cls')
         else:
-            # Apenas adiciona algumas linhas em branco para separar visualmente
             print("\n" * 2)
         
         banner = f"""
@@ -346,7 +340,6 @@ class DirBrute:
                 paths_list = status_groups[status]
                 status_color = Colors.GREEN if status < 300 else Colors.YELLOW if status < 400 else Colors.CYAN if status < 500 else Colors.RED
                 print(f"  {status_color}[{status}]{Colors.RESET} {Colors.BOLD}{len(paths_list)} path(s){Colors.RESET}")
-                # Mostrar todos os resultados
                 for path_info in paths_list:
                     size_str = f" [{self.format_size(path_info['length'])}]" if path_info.get('length') else ""
                     print(f"    {Colors.DIM}→{Colors.RESET} {path_info['url']}{size_str}")
@@ -419,7 +412,6 @@ class DirBrute:
                 
                 for future in as_completed(futures):
                     if self.is_interrupted():
-                        # Cancelar futures pendentes
                         for f in futures:
                             f.cancel()
                         break
@@ -442,18 +434,15 @@ class DirBrute:
         except KeyboardInterrupt:
             self.set_interrupted()
         
-        print()  # Nova linha após progresso
+        print()  
         
-        # Salvar JSON se solicitado
         if self.json_output and self.found_paths:
             json_file = self.output_file.replace('.txt', '.json') if self.output_file else 'results.json'
             self.save_json(json_file)
             self.log(f"Resultados salvos em JSON: {json_file}", Colors.CYAN)
         
-        # Mostrar resumo
         self.print_summary(interrupted=self.is_interrupted())
 
-# Variável global para o scanner (para signal handler)
 scanner_instance = None
 
 def signal_handler(sig, frame):
@@ -463,7 +452,6 @@ def signal_handler(sig, frame):
         scanner_instance.set_interrupted()
         print(f"\n\n{Colors.YELLOW}{Colors.BOLD}[!] Interrupção detectada... Finalizando graciosamente...{Colors.RESET}")
         print(f"{Colors.YELLOW}Aguarde enquanto finalizamos as requisições em andamento...{Colors.RESET}\n")
-        # Dar tempo para threads finalizarem
         time.sleep(1)
     else:
         print(f"\n\n{Colors.YELLOW}[!] Interrompido pelo usuário{Colors.RESET}")
@@ -578,7 +566,6 @@ Exemplos:
     try:
         scanner_instance.run()
     except KeyboardInterrupt:
-        # Já tratado pelo signal handler
         pass
     except Exception as e:
         print(f"\n{Colors.RED}{Colors.BOLD}Erro fatal: {e}{Colors.RESET}")
